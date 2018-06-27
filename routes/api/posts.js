@@ -18,54 +18,107 @@ router.get('/test', (req, res) => res.json({ msg: 'Posts Works' }));
 // @desc    Get posts
 // @access  Public
 router.get('/', (req, res) => {
-	Post.find()
-		.sort({ date: -1 })
-		.then(posts => res.json(posts))
-		.catch(err => res.status(404).json({ nopostfound: 'No posts found' }));
+  Post.find()
+    .sort({ date: -1 })
+    .then(posts => res.json(posts))
+    .catch(err => res.status(404).json({ nopostfound: 'No posts found' }));
 });
 
 // @route   GET api/posts/:id
 // @desc    Get post by id
 // @access  Public
 router.get('/:id', (req, res) => {
-	Post.findById(req.params.id)
-		.then(post => res.json(post))
-		.catch(err =>
-			res.status(404).json({ nopostfound: 'No post found with that ID' })
-		);
+  Post.findById(req.params.id)
+    .then(post => res.json(post))
+    .catch(err =>
+      res.status(404).json({ nopostfound: 'No post found with that ID' })
+    );
 });
 
 // @route   POST api/posts
 // @desc    Create post
 // @access  Private
 router.post(
-	'/',
-	passport.authenticate('jwt', { session: false }),
-	(req, res) => {
-		const { errors, isValid } = validatePostInput(req.body);
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    const { errors, isValid } = validatePostInput(req.body);
 
-		// Check Validation
-		if (!isValid) {
-			// If any errors, send 400 with errors object
-			return res.status(400).json(errors);
-		}
+    // Check Validation
+    if (!isValid) {
+      // If any errors, send 400 with errors object
+      return res.status(400).json(errors);
+    }
 
-		const newPost = new Post({
-			text: req.body.text,
-			name: req.body.name,
-			avatar: req.body.avatar,
-			user: req.user.id
-		});
+    const newPost = new Post({
+      text: req.body.text,
+      name: req.body.name,
+      avatar: req.body.avatar,
+      user: req.user.id
+    });
 
-		newPost.save().then(post => res.json(post));
-	}
+    newPost.save().then(post => res.json(post));
+  }
 );
 
-// @route   DELETE api/posts/:od
+// @route   DELETE api/posts/:id
 // @desc    Delete post
 // @access  Private
 router.delete(
-	'/:id',
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const profile = await Profile.findOne({ user: req.user.id });
+      const post = await Post.findById(req.params.id);
+
+      if (!profile || !post) throw new Error();
+
+      if (post.user.toString() !== req.user.id) {
+        return res.status(401).json({ notauthorized: 'User not authorized' });
+      }
+
+      // Delete
+      post.remove().then(() => res.json({ success: true }));
+    } catch (e) {
+      res.status(404).json({ postnotfound: 'Post not found' });
+    }
+  }
+);
+
+// @route   POST api/posts/like/:id
+// @desc    Like post
+// @access  Private
+router.post(
+  '/like/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const profile = await Profile.findOne({ user: req.user.id });
+      const post = await Post.findById(req.params.id);
+
+      if (!profile || !post) throw new Error();
+
+      if (post.likes.filter(like => like.user.toString() === req.user.id).length > 0) {
+        return res
+          .status(400)
+          .json({ alreadyliked: 'User already liked this post' });
+      }
+
+			// Add user id to likes array
+			post.likes.unshift({ user: req.user.id });
+			post.save().then(post => res.json(post));
+    } catch (e) {
+      res.status(404).json({ postnotfound: 'Post not found' });
+    }
+  }
+);
+
+// @route   POST api/posts/unlike/:id
+// @desc    Unlike post
+// @access  Private
+router.post(
+	'/unlike/:id',
 	passport.authenticate('jwt', { session: false }),
 	async (req, res) => {
 		try {
@@ -74,16 +127,81 @@ router.delete(
 
 			if (!profile || !post) throw new Error();
 
-			if (post.user.toString() !== req.user.id) {
-				return res.status(401).json({ notauthorized: 'User not authorized' });
+			if (post.likes.filter(like => like.user.toString() === req.user.id).length === 0) {
+				return res
+					.status(400)
+					.json({ alreadyliked: 'User have not yet liked this post' });
 			}
 
-			// Delete
-			post.remove().then(() => res.json({ success: true }));
+			// Remove Like
+			post.likes = post.likes.filter(like => like.user.toString() === req.params.id);
+			post.save().then(post => res.json(post));
 		} catch (e) {
 			res.status(404).json({ postnotfound: 'Post not found' });
 		}
 	}
 );
 
+// @route   POST api/posts/comment/:id
+// @desc    Add a comment to post
+// @access  Private
+router.post(
+	'/comment/:id',
+	passport.authenticate('jwt', { session: false }),
+	async (req, res) => {
+		const { errors, isValid } = validatePostInput(req.body);
+
+		// Check Validation
+		if (!isValid) {
+			// If any errors, send 400 with errors object
+			return res.status(400).json(errors);
+		}
+
+		try {
+			const post = await Post.findById(req.params.id);
+			if (!post) throw new Error();
+			const newComment = {
+				text: req.body.text,
+				name: req.body.name,
+				avatar: req.body.avatar,
+				user: req.user.id
+			};
+
+			// Add to comments array
+			post.comments.unshift(newComment);
+			post.save().then(post => res.json(post));
+		} catch (e) {
+			res.status(404).json({ postnotfound: 'No post found.'});
+		}
+	}
+);
+
+// @route   DELETE api/posts/comment/:id/:comment_id
+// @desc    Delete a comment
+// @access  Private
+router.delete(
+	'/comment/:id/:comment_id',
+	passport.authenticate('jwt', { session: false }),
+	async (req, res) => {
+		try {
+			const post = await Post.findById(req.params.id);
+
+			if (!post) throw new Error();
+
+			// Check if comment exists
+			if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
+				return res
+					.status(404)
+					.json({ commentnotexist: 'Comment does not exist' });
+			}
+
+			// Remove comment
+			post.comments = post.comments.filter(comment => comment._id.toString() !== req.params.comment_id);
+			post.save().then(post => res.json(post));
+        } catch (e) {
+			res.status(404).json({ postnotfound: 'No post found.' });
+		}
+	}
+);
+	
 module.exports = router;
