@@ -1,27 +1,30 @@
 {
-  "name": "socialapp",
-  "version": "1.0.0",
-  "description": "Social network app",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Arnold Joseph A. Fudolig",
-  "license": "MIT",
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "gravatar": "^1.6.0",
-    "jsonwebtoken": "^8.3.0",
-    "mongoose": "^5.1.6",
-    "passport": "^0.4.0",
-    "passport-jwt": "^4.0.0",
-    "validator": "^10.4.0"
-  },
-  "devDependencies": {
-    "nodemon": "^1.17.5"
-  }
+	"name": "socialapp",
+	"version": "1.0.0",
+	"description": "Social network app",
+	"main": "server.js",
+	"scripts": {
+		"client-install": "npm install --prefix client",
+		"start": "node server.js",
+		"server": "nodemon server.js",
+		"client": "npm start --prefix client",
+		"dev": "concurrently \"npm run server\" \"npm run client\""
+	},
+	"author": "Arnold Joseph A. Fudolig",
+	"license": "MIT",
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"body-parser": "^1.18.3",
+		"concurrently": "^3.6.0",
+		"express": "^4.16.3",
+		"gravatar": "^1.6.0",
+		"jsonwebtoken": "^8.3.0",
+		"mongoose": "^5.1.6",
+		"passport": "^0.4.0",
+		"passport-jwt": "^4.0.0",
+		"validator": "^10.4.0"
+	},
+	"devDependencies": {
+		"nodemon": "^1.17.5"
+	}
 }
