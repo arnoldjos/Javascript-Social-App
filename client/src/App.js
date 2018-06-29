@@ -11,23 +11,23 @@ import './App.css';
 import store from './store';
 
 class App extends Component {
-  render() {
-    return (
-      <Provider store={store}>
-        <BrowserRouter>
-          <div className="App">
-            <Navbar />
-            <Route exact path="/" component={Landing} />
-            <div className="container">
-              <Route exact path="/register" component={Register} />
-              <Route exact path="/login" component={Login} />
-            </div>
-            <Footer />
-          </div>
-        </BrowserRouter>
-      </Provider>
-    );
-  }
+	render() {
+		return (
+			<Provider store={store}>
+				<BrowserRouter>
+					<div className="App">
+						<Navbar />
+						<Route exact path="/" component={Landing} />
+						<div className="container">
+							<Route exact path="/register" component={Register} />
+							<Route exact path="/login" component={Login} />
+						</div>
+						<Footer />
+					</div>
+				</BrowserRouter>
+			</Provider>
+		);
+	}
 }
 
 export default App;

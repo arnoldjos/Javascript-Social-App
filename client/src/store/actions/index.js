@@ -1,1 +1,8 @@
-export { registerUser } from './auth_actions';
+export {
+	registerUser,
+	getErrors,
+	successRegisterUser,
+	initAuthPath,
+	loginUser,
+	setCurrentUser
+} from './auth_actions';
