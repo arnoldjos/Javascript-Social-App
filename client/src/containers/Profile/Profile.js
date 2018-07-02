@@ -11,64 +11,75 @@ import Spinner from '../../components/common/Spinner/Spinner';
 import { getProfileByHandle } from '../../store/actions';
 
 class Profile extends Component {
-	componentDidMount() {
-		if (this.props.match.params.handle) {
-			this.props.getProfileByHandle(this.props.match.params.handle);
-		}
-	}
+  componentDidMount() {
+    if (this.props.match.params.handle) {
+      this.props.getProfileByHandle(this.props.match.params.handle);
+    }
+  }
 
-	render() {
-		const { profile, loading } = this.props.profile;
-		let profileContent;
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.profile.profile === null && this.props.profile.loading) {
+      this.props.history.push('/not-found');
+    }
+  }
 
-		if (profile === null || loading) {
-			profileContent = <Spinner />;
-		} else {
-			profileContent = (
-				<div>
-					<div className="row">
-						<div className="col-md-6">
-							<Link to="/profiles" className="btn btn-light mb-3 float-left">
-								Back To Profiles
-							</Link>
-						</div>
-						<div className="col-md-6" />
-					</div>
-					<ProfileHeader profile={profile} />
-					<ProfileAbout />
-					<ProfileCreds />
-					<ProfileGithub />
-				</div>
-			);
-		}
+  render() {
+    const { profile, loading } = this.props.profile;
+    let profileContent;
 
-		return (
-			<div className="profile">
-				<div className="container">
-					<div className="row">
-						<div className="col-md-12">{profileContent}</div>
-					</div>
-				</div>
-			</div>
-		);
-	}
+    if (profile === null || loading) {
+      profileContent = <Spinner />;
+    } else {
+      profileContent = (
+        <div>
+          <div className="row">
+            <div className="col-md-6">
+              <Link to="/profiles" className="btn btn-light mb-3 float-left">
+                Back To Profiles
+              </Link>
+            </div>
+            <div className="col-md-6" />
+          </div>
+          <ProfileHeader profile={profile} />
+          <ProfileAbout profile={profile} />
+          <ProfileCreds
+            education={profile.education}
+            experience={profile.experience}
+          />
+          {profile.githubusername ? (
+            <ProfileGithub username={profile.githubusername} />
+          ) : null}
+        </div>
+      );
+    }
+
+    return (
+      <div className="profile">
+        <div className="container">
+          <div className="row">
+            <div className="col-md-12">{profileContent}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 Profile.propTypes = {
-	profile: PropTypes.object.isRequired
+  profile: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => {
-	return {
-		profile: state.profile
-	};
+  return {
+    profile: state.profile
+  };
 };
 
 const mapDispatchToProps = dispatch => {
-	return { getProfileByHandle: handle => dispatch(getProfileByHandle(handle)) };
+  return { getProfileByHandle: handle => dispatch(getProfileByHandle(handle)) };
 };
 
 export default connect(
-	mapStateToProps,
-	mapDispatchToProps
+  mapStateToProps,
+  mapDispatchToProps
 )(Profile);

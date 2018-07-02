@@ -23,6 +23,15 @@ export const ADD_EDUCATION = 'ADD_EDUCATION';
 export const DELETE_EDUCATION = 'DELETE_EDUCATION';
 export const DELETE_ACCOUNT = 'DELETE_ACCOUNT';
 
+// POST
+export const POST_LOADING = 'POST_LOADING';
+export const INITIAL_GET_POSTS = 'INITIAL_GET_POSTS';
+export const GET_POSTS = 'GET_POSTS';
+export const INITIAL_GET_POST = 'INITIAL_GET_POST';
+export const INITIAL_ADD_POST = 'INITIAL_ADD_POST';
+export const ADD_POST = 'ADD_POST';
+export const DELETE_POST = 'DELETE_POST';
+
 // ERRORS
 export const GET_ERRORS = 'GET_ERRORS';
 export const CLEAR_ERRORS = 'CLEAR_ERRORS';
