@@ -32,3 +32,12 @@ export function* loginUserSaga(action) {
 		yield put(actions.getErrors(err.response.data));
 	}
 }
+
+export function* logoutUserSaga(action) {
+	// Remove token from local storage
+	yield localStorage.removeItem('jwtToken');
+	// Remove auth header for future requests
+	yield setAuthToken(false);
+	// Set current user to {} which will set isAuthenticated to false
+	yield put(actions.setCurrentUser({}));
+}

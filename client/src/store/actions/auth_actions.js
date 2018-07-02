@@ -12,15 +12,14 @@ export const successRegisterUser = path => {
 	return { type: actionTypes.SUCESS_REGISTER_USER, path };
 };
 
-export const getErrors = errors => {
-	return {
-		type: actionTypes.GET_ERRORS,
-		errors
-	};
-};
-
 export const loginUser = userData => {
 	return { type: actionTypes.INITIAL_LOGIN_USER, payload: userData };
+};
+
+export const logoutUser = () => {
+	return {
+		type: actionTypes.LOGOUT_USER
+	};
 };
 
 export const setCurrentUser = decoded => {

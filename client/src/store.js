@@ -2,7 +2,7 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import createSagaMiddleware from 'redux-saga';
 import rootReducer from './store/reducers';
-import { watch } from './store/sagas';
+import { watchAuth, watchProfile } from './store/sagas';
 
 const initialState = {};
 const sagaMiddleware = createSagaMiddleware();
@@ -27,6 +27,7 @@ const store = createStore(
 	composeEnhancers(applyMiddleware(...middleware))
 );
 
-sagaMiddleware.run(watch);
+sagaMiddleware.run(watchAuth);
+sagaMiddleware.run(watchProfile);
 
 export default store;
